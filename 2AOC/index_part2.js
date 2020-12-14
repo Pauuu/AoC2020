@@ -1,5 +1,4 @@
 const fs = require('fs');
-const { CLIENT_RENEG_WINDOW } = require('tls');
 
 const passwords = [];
 
@@ -16,8 +15,8 @@ fs.readFile("./list.txt", 'utf8', (err, data) => {
         // creates the array of objects of the list of passwords
         for (let i = 0; i < passwordsRgx.length; i += 4) {
             passwords.push({
-                min: passwordsRgx[i],
-                max: passwordsRgx[i + 1],
+                first: passwordsRgx[i],
+                second: passwordsRgx[i + 1],
                 letter: passwordsRgx[i + 2],
                 passw: passwordsRgx[i + 3]
             });
@@ -25,17 +24,32 @@ fs.readFile("./list.txt", 'utf8', (err, data) => {
 
         // counts the total passowrds that are valid
         passwords.forEach(password => {
-            const totalChars = charCount(password.passw, password.letter);
-
-            if (totalChars >= password.min && totalChars <= password.max) {
-                totalValidPasswords++;
-            }
+            if (checkCharIndex(
+                password.passw,
+                password.letter,
+                password.first,
+                password.second)) totalValidPasswords++;
         });
 
         // output the result
         console.log(totalValidPasswords);
     }
 });
+
+// checks if the are chars in the first and second given position
+// "index 0" does not exist
+function checkCharIndex(string, char, firstChar, secondChar) {
+    // XOR comparation
+    if (
+        (string.charAt(firstChar - 1) !== char &&
+            string.charAt(secondChar - 1) === char)
+        ||
+        (string.charAt(firstChar - 1) === char &&
+            string.charAt(secondChar - 1) !== char)
+    ) return true;
+
+    return false;
+}
 
 // counts the numbers of chars of string given a specific char
 function charCount(string, letter) {
